@@ -4,7 +4,7 @@ A visualization of the longitudinal census data accompanying the paper:
 
 Logan, John R., Zengwang Xu, and Brian J. Stults. 2014. "Interpolating US Decennial Census Tract Data from as Early as 1970 to 2010: A Longitudinal Tract Database" The Professional Geographer 66(3): 412–420.
 
-[Live version](https://github.com/haben-michael/longitudinal-census/blob/master/census.html)
+[Live version](https://htmlpreview.github.io/?https://github.com/haben-michael/longitudinal-census/blob/master/census.html)
 
 The current build is in javascript with leaflet and D3 but R/shiny implementation is among the older files.
 
