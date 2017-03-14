@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Massachusetts leaflet</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet"
+	      href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+        <link href="http://skeate.github.io/Leaflet.timeline/stylesheets/leaflet.timeline.css" rel="stylesheet" />
+	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+        <script src="http://skeate.github.io/Leaflet.timeline/javascripts/leaflet.timeline.js"></script>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+
+	<style>
+	  #map {
+	  width: 100%;
+	  height: 920px;
+	  }
+          .leaflet-bottom.leaflet-left{
+          width: 100%;
+          }
+          .leaflet-control-container .leaflet-timeline-controls{
+          box-sizing: border-box;
+          width: 100%;
+          margin: 0;
+          margin-bottom: 15px;
+          }
+          .leaflet-control {
+          float: none;
+          <!-- position: relative; -->
+          }
+          .info {
+          padding: 6px 8px;
+          font: 14px/16px Arial, Helvetica, sans-serif;
+          background: white;
+          background: rgba(255,255,255,0.8);
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+          border-radius: 5px;
+          <!-- width: 960; -->
+          <!-- height: 500; -->
+          }
+          .info h4 {
+          margin: 0 0 5px;
+          color: #777;
+          }
+          .legend {
+          text-align: right;
+          line-height: 18px;
+          color: #555;
+          position: relative;
+          bottom: 50px;
+          }
+          .legend i {
+          width: 18px;
+          height: 18px;
+          float: left;
+          margin-right: 8px;
+          opacity: 0.7;
+          }
+          .timeline {
+          position:relative;
+          height: 30px;
+          overflow: hidden;
+          font-size: 12px;
+          width: 900px;
+          }
+          .timeline_grey {
+          position: absolute;
+          left:0px;
+          top: 20px;
+          width: 1200px;
+          height:2px;
+          background: #fedcba
+          }
+          .timeline .timeline_event {
+          position: absolute;
+          top: 0px;
+          text-align: center;
+          color: #999;
+          padding-bottom: 5px;
+          <!-- transform: translateX(-50%); -->
+          }
+          .timeline .timeline_event:after {
+          z-index: 3;
+          content: '';
+          position: absolute;
+          top: 14px;
+          left: 50%;
+          right: auto;
+          width: 10px;
+          height: 10px;
+          background-color: #FFF;
+          border: 2px solid #ddd;
+          border-radius: 50%;
+          transform: translateX(-50%);
+          }
+          .timeline .selected {
+          color: #66A;
+          }
+          .timeline .selected:after {
+          z-index: 3;
+          border: 2px solid #66A;
+          background-color: #66A;
+          }
+          <!-- .linegraph { -->
+          <!-- height: 500; -->
+          <!-- width: 760; -->
+          <!-- } -->
+          .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 1.5px;
+          }
+	  .helpcontainer {
+	  position:absolute;
+	  }
+	  .help {
+	  overflow : scroll;
+	  position:relative;
+	  height: 200px;
+	  width: 130px;
+	  opacity: .3;
+	  background-color: green;
+	  <!-- transition: opacity 1s ease-in-out; -->
+	  <!-- -moz-transition: opacity 1s ease-in-out; -->
+	  <!-- -webkit-transition: opacity 1s ease-in-out; -->
+	  }
+	  .help:hover {
+	  opacity: 1.0;
+	  transition: opacity .55s ease-in-out;
+	  -moz-transition: opacity .55s ease-in-out;
+	  -webkit-transition: opacity .55s ease-in-out;
+	  }
+	  #covariate-list-container {
+	  margin: 3px 0px 00px -50px;
+	  visibility: hidden;
+	  position: absolute;
+	  <!-- left: 0px; -->
+	  <!-- top: 0px; -->
+	  width:100%;
+	  height:100%;
+	  text-align:center;
+	  z-index: 1000;
+	  }
+	  div#covariate-list {
+	  overflow : scroll;
+	  position:relative;
+	  height: 200px;
+	  width: 130px;
+	  opacity: .7;
+	  <!-- background-color: green; -->
+
+	  <!-- width:300px; -->
+	  text-align:left;
+	  }
+	  button#property-list {
+	  color:blue;
+	  background:none;
+	  border:none;
+	  }
+	  <!-- button#property-list:hover { -->
+	  <!-- opacity: 1.0; -->
+	  <!-- transition: opacity .55s ease-in-out; -->
+	  <!-- -moz-transition: opacity .55s ease-in-out; -->
+	  <!-- -webkit-transition: opacity .55s ease-in-out; -->
+	  <!-- } -->
+	  <!-- .listTweets { -->
+	  <!-- overflow : scroll; -->
+	  <!-- height: 50px; -->
+	  <!-- width: 100px; -->
+	  <!-- opacity: .3; -->
+	  <!-- background-color: green; -->
+	  <!-- } -->
+	</style>
+
+	<!-- <style>#map { width: 100%; height: 700px; } -->
+        <!--    -->
+        <!--   </style> -->
+</head>
+<body>
+
+  <div id='map'></div>
+
+  <script type="text/javascript" src="MA_data.js"></script>
+
+  <script type="text/javascript" src="census.js"></script>
+  <!-- <script type="text/javascript">console.log(fills)</script> -- -->
+
+</body>
+</html>
+
