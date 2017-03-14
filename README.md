@@ -9,7 +9,7 @@ Logan, John R., Zengwang Xu, and Brian J. Stults. 2014. "Interpolating US Decenn
 The current build is in javascript with leaflet and D3 but R/shiny implementation is among the older files.
 
 ## USAGE
-A formula using census variable names may be input in the upper right form. The left/right arrow keys advance the map through the decades.
+A statistic using census variable names may be input in the upper right form. The left/right arrow keys advance the map through the decades. Left clicking on a tract plots the statistic over the decennial census data included (1970-2010).
 
 ## TODO
   * average over several tracts after selecting with mouse
