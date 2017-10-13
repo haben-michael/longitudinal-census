@@ -2,6 +2,7 @@
 //choice of color gradient--need diverging for neg/pos values
 //bins issue--quantiles lump large ranges
 //disable keyboard/mouse handlers when editing infobox
+//https://gis.stackexchange.com/questions/104507/disable-panning-dragging-on-leaflet-map-for-div-within-map
 
 // formula = "POPYY";
 formula = '(NHBLKYY+HISPYY-NHWHTYY-ASIANYY)/POPYY';
@@ -101,7 +102,7 @@ function onEachFeature(feature, layer) {
     });
 }
 
-document.getElementById('map').addEventListener("keydown",function(e){
+keydownListener = function(e){
     // console.log(current_time);
     if (e.keyCode==37) current_time = current_time-1;
     if (e.keyCode==39) current_time = current_time+1;
@@ -112,7 +113,9 @@ document.getElementById('map').addEventListener("keydown",function(e){
     time_elts[current_time].className = "timeline_event selected";
     geojson.updateTime(current_time);
     L.DomEvent.stopPropagation(e);
-});
+}
+
+document.getElementById('map').addEventListener("keydown",keydownListener);
 
 
 
@@ -243,24 +246,34 @@ info.drawSVG = function(times,stats) {
 
 info.update = function (properties) {
     // this._div.innerHTML = '<h4>'+formula+' <button id="change-formula" class="link">change</button></h4>'
-	this._div.innerHTML = '<form id="change-formula">'
+    this._div.innerHTML = '<form id="change-formula">'
 	+'<input type="text" id="formula" value='+formula + '></form><br>'
         + (properties ? "<b>" + String(properties.NAMELSAD10)
            + "</b><br /><b>" + (properties.stat ? properties.stat[current_time] : 'NA') + "</b>" //+" (" +properties.id +")"
            : '(no selection) |<button id=property-list>list</button>');
-    this._div.innerHTML += `
-<div id="covariate-list-container"><div id="covariate-list" class="info"></div></div>
-`;
+    this._div.innerHTML += `<div id="covariate-list-container"><div id="covariate-list" class="info"></div></div>`;
 
-   //  this._div.innerHTML += `
-// <form id="frm1">
-//   First name: <input type="text" name="fname" value="Donald"><br>
-//   <input type="submit" value="Submit">
-// </form>
-// `;
-
+    //  this._div.innerHTML += `
+    // <form id="frm1">
+    //   First name: <input type="text" name="fname" value="Donald"><br>
+    //   <input type="submit" value="Submit">
+    // </form>
+    // `;
 
     (hook = document.getElementById('change-formula')) ? hook.addEventListener('submit',function(e){getNewFormula(e);  }) : {};
+
+    // (hook = document.getElementById('formula')) ? hook.addEventListener('focusout',function(e){alert('!');  }) : {};
+    // (hook = document.getElementById('formula')) ? hook.addEventListener('click',function(e){console.log('in!');  }) : {};
+
+    (hook = document.getElementById('formula')) ? hook.addEventListener('click',function(e){
+        document.getElementById('map').removeEventListener("keydown",keydownListener);
+        map.dragging.disable();
+    }) : {};
+    (hook = document.getElementById('formula')) ? hook.addEventListener('focusout',function(e){
+        document.getElementById('map').addEventListener("keydown",keydownListener);
+        map.dragging.enable();
+    }) : {};
+
 
     (hook = document.getElementById('property-list')) ? hook.onclick = function() {
 	listCovariates();
@@ -279,6 +292,8 @@ info.addTo(map);
 
 
 //}
+
+
 
 //timeline
 
@@ -336,3 +351,6 @@ legend.addTo(map);
 
 
 //		'['+bins[i] + (i<bins.length-1) ? ('&mdash;' + bins[i+1]+')') : '+');
+
+
+
