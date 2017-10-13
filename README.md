@@ -15,4 +15,3 @@ A statistic using census variable names may be input in the upper right form. Th
   * average over several tracts after selecting with mouse
   * choice of color gradient--need diverging for neg/pos values
   * bins issue--quantiles lump large ranges
-  * disable keyboard/mouse handlers when editing infobox
