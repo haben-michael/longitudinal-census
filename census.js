@@ -3,6 +3,7 @@
 //bins issue--quantiles lump large ranges
 //disable keyboard/mouse handlers when editing infobox
 //https://gis.stackexchange.com/questions/104507/disable-panning-dragging-on-leaflet-map-for-div-within-map
+//doesnt shift timeline when initially loaded; must navigate with mouse first
 
 // formula = "POPYY";
 formula = '(NHBLKYY+HISPYY-NHWHTYY-ASIANYY)/POPYY';
@@ -18,7 +19,7 @@ if(times.length==1) data.features.forEach(e => (e.properties.fill = [e.propertie
 
 
 
-var map = L.map('map').setView([ 42.30381,-71.09435], 12);
+var map = L.map('map', {boxZoom: false}).setView([ 42.30381,-71.09435], 12);
 
 L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
     attribution: 'Positron'
@@ -77,42 +78,85 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 
-    info.update(layer.feature.properties);
+    if(!e.originalEvent.shiftKey) {
+        info.update(layer.feature.properties);
+    }
 //    info.drawSVG([2009, 2010, 2011],[20,40,15]);
 
 }
 
-    function resetHighlight(e) {
-    // e.target.setStyle({fillColor : e.target.feature.properties.fill[current_time]});
-    geojson.resetStyle(e.target);
-	info.update();
+// function resetHighlight(e) {
+//     // e.target.setStyle({fillColor : e.target.feature.properties.fill[current_time]});
+//     if(!e.originalEvent.shiftKey) {
+//         geojson.resetStyle(e.target);
+//         info.update();
+//     }
 
+// }
+
+var selectedFeatures = [];
+
+
+function mouseOut(e) {
+    if(selectedFeatures.indexOf(e.target)==-1) {
+        geojson.resetStyle(e.target);
+        info.update();
+    }
 }
+// function zoomToFeature(e) {
+//     map.fitBounds(e.target.getBounds());
+//     info.drawSVG(times,e.target.feature.properties.stat);
+// }
 
-function zoomToFeature(e) {
-    map.fitBounds(e.target.getBounds());
-    info.drawSVG(times,e.target.feature.properties.stat);
+
+
+function onClick(e) {
+    if (e.originalEvent.shiftKey) {
+        if(selectedFeatures.indexOf(e.target)==-1) selectedFeatures.push(e.target);
+        averageStats = Array(times.length).fill(0);
+        selectedFeatures.forEach(function(target) {
+            for (var i=0; i < times.length; i++) {
+                averageStats[i] += target.feature.properties.stat[i];
+            }
+        })
+        averageStats = averageStats.map(function(stat) {return stat/times.length;});
+        info.drawSVG(times,averageStats);
+        // L.DomEvent.stopPropagation(e.target);
+    } else {
+        selectedFeatures.forEach(function(target) {geojson.resetStyle(target);})
+        info.update();
+        selectedFeatures = [];
+        // map.fitBounds(e.target.getBounds());
+        // map.setView(e.target.getCenter());
+        info.drawSVG(times,e.target.feature.properties.stat);
+    }
 }
 
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
-        mouseout: resetHighlight,
-        click: zoomToFeature
+        mouseout: mouseOut,
+        click: onClick
     });
 }
 
 keydownListener = function(e){
     // console.log(current_time);
-    if (e.keyCode==37) current_time = current_time-1;
-    if (e.keyCode==39) current_time = current_time+1;
+    if (e.keyCode==37) {
+        current_time = current_time-1;
+        L.DomEvent.stopPropagation(e);
+    };
+    if (e.keyCode==39) {
+        current_time = current_time+1;
+        L.DomEvent.stopPropagation(e);
+    };
     current_time = ((current_time%times.length)+times.length)%times.length;
     // console.log(current_time);
     time_elts = document.getElementsByClassName("time_list")[0].childNodes;
     time_elts.forEach(e=>e.className = "timeline_event");
     time_elts[current_time].className = "timeline_event selected";
     geojson.updateTime(current_time);
-    L.DomEvent.stopPropagation(e);
+   // L.DomEvent.stopPropagation(e);
 }
 
 document.getElementById('map').addEventListener("keydown",keydownListener);
