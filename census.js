@@ -12,57 +12,91 @@ var spectrum = d3.interpolatePRGn;
 // var counter = 0;
 var current_time = 0;
 formula = String(formula).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-if(times.length==1) data.features.forEach(e => (e.properties.fill = [e.properties.fill]));
+if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
+data.features.forEach(f => {
+    f.geometry.minLat = f.geometry.minLon = Infinity;
+    f.geometry.maxLat = f.geometry.maxLon = -Infinity;
+    f.geometry.coordinates[0][0].forEach(x => {
+        if (x[0] < f.geometry.minLat) f.geometry.minLat = x[0];
+        if (x[1] < f.geometry.minLon) f.geometry.minLon = x[1];
+        if (x[0] > f.geometry.maxLat) f.geometry.maxLat = x[0];
+        if (x[1] > f.geometry.maxLon) f.geometry.maxLon = x[1];
+    });
+});
+
 
 // updateStats();
 
 
 
 
-var map = L.map('map', {boxZoom: false}).setView([ 42.30381,-71.09435], 12);
+// var map = L.map('map', {boxZoom: false}).setView([ 42.30381,-71.09435], 12);
+var map = L.map('map').setView([ 42.30381,-71.09435], 12);
 
 L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+    maxZoom: 18,
     attribution: 'Positron'
 }).addTo(map);
 map.attributionControl.setPrefix('');
 
 
+// L.DomUtil.create('div', 'select-box', document.body);
+// var selectBox = document.getElementsByClassName('select-box')[0];
 
 // interaction handlers
-function getNewFormula(e){
-    e.preventDefault();
-    new_formula = document.getElementById('formula').value
+// function getNewFormula(e){
+//     e.preventDefault();
+//     new_formula = document.getElementById('formula').value
 
-    // new_formula = prompt("new formula",String(formula));
-    if (new_formula) formula = new_formula;
-    geojson.updateStats(formula);
-    geojson.setFillColors(n_colors);
-    legend.addTo(map);
-}
+//     // new_formula = prompt("new formula",String(formula));
+//     if (new_formula) formula = new_formula;
+//     geojson.updateStats(formula);
+//     geojson.setFillColors(n_colors);
+//     legend.addTo(map);
+// }
 
-function listCovariates() {
-    var overlay = document.getElementById('covariate-list-container');
-    overlay.style.visibility = (overlay.style.visibility=='visible') ? 'hidden' : 'visible';
-    document.getElementById('covariate-list').innerHTML = Object.keys(geojson.getLayers()[0].feature.properties).join('<br/>');
+// function listCovariates() {
+//     var overlay = document.getElementById('covariate-list-container');
+//     overlay.style.visibility = (overlay.style.visibility=='visible') ? 'hidden' : 'visible';
+//     document.getElementById('covariate-list').innerHTML = Object.keys(geojson.getLayers()[0].feature.properties).join('<br/>');
 
-}
+// }
 
-function updateStats(formula) {
-    formulas = []
-    for(var i=0; i<times.length; i++) {
-	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
-    }
-    data.features.forEach(function(feature) {
-	feature.stats = [];
-	with(feature.properties) {
-            for(var i=0; i<formulas.length; i++) {
-		feature.stats.push(eval(formulas[i]));
-            }
-	}
-    })
+// function updateStats(formula) {
+//     formulas = []
+//     for(var i=0; i<times.length; i++) {
+// 	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+//     }
+//     data.features.forEach(function(feature) {
+// 	feature.stats = [];
+// 	with(feature.properties) {
+//             for(var i=0; i<formulas.length; i++) {
+// 		feature.stats.push(eval(formulas[i]));
+//             }
+// 	}
+//     })
 
 
-}
+// }
+
+
+map.on("boxzoomend", function(e) {
+    alert('!');
+    L.DomEvent.stopPropagation(e.target);
+
+});
+
+map.boxZoom._onMouseUp = function(e){alert('!')};
+// L.Map.BoxPrinter = L.Map.BoxZoom.extend({
+//     _onMouseUp: function (e) {
+//         alert('!');
+//         this._map.fire('boxzoomend', {boxZoomBounds: bounds});
+//    }
+// })
+// L.Map.mergeOptions({boxPrinter: true});
+// L.Map.addInitHook('addHandler', 'boxPrinter', L.Map.BoxPrinter);
+
+// L.Map.mergeOptions({boxZoom: false});
 
 function highlightFeature(e) {
     var layer = e.target;
@@ -132,13 +166,114 @@ function onClick(e) {
     }
 }
 
+
+x1 = 0, y1 = 0, x2 = 0, y2 = 0
+;
+function reCalc() { //This will restyle the div
+    // var x3 = Math.min(x1,x2); //Smaller X
+    // var x4 = Math.max(x1,x2); //Larger X
+    // var y3 = Math.min(y1,y2); //Smaller Y
+    // var y4 = Math.max(y1,y2); //Larger Y
+    var minX = Math.min(x1,x2);
+    var maxX = Math.max(x1,x2);
+    var minY = Math.min(y1,y2);
+    var maxY = Math.max(y1,y2);
+    selectBox.div.style.left = minX  + 'px';
+    selectBox.div.style.top = minY + 'px';
+    selectBox.div.style.width = (maxX - minX) + 'px';
+    selectBox.div.style.height = (maxY - minY) + 'px';
+    selectBox.div.style.border = '10px solid black' ;
+    selectBox.div.style.visibility = 'block';
+    selectBox.div.style.hidden = 0;
+    selectBox.div.style.position = 'absolute';
+}
+
+// function reCalc() { //This will restyle the div
+//     // var x3 = Math.min(x1,x2); //Smaller X
+//     // var x4 = Math.max(x1,x2); //Larger X
+//     // var y3 = Math.min(y1,y2); //Smaller Y
+//     // var y4 = Math.max(y1,y2); //Larger Y
+//     var minX = Math.min(x1,x2);
+//     var maxX = Math.max(x1,x2);
+//     var minY = Math.min(y1,y2);
+//     var maxY = Math.max(y1,y2);
+//     selectBox.style.left = minX  + 'px';
+//     selectBox.style.top = minY + 'px';
+//     selectBox.style.width = (maxX - minX) + 'px';
+//     selectBox.style.height = (maxY - minY) + 'px';
+//     selectBox.style.border = '10px solid black' ;
+//     selectBox.style.visibility = 'block';
+//     selectBox.style.hidden = 0;
+//     selectBox.style.position = 'absolute';
+// }
+
+// function mouseMove(e) {
+//     if(e.originalEvent.shiftKey) {
+//         x2 = e.originalEvent.clientX;
+//         y2 = e.originalEvent.clientY;
+//         reCalc();
+//                 // L.DomEvent.stopPropagation(e.target);
+
+//     }
+// }
+
+// function mouseDown(e) {
+//     // alert(e.originalEvent.clientX)
+//     if(e.originalEvent.shiftKey) {
+//         // selectBox.div.hidden = 0;
+//         // selectBox.div.style.visibility = 'block';
+//         x1 = e.originalEvent.clientX;
+//         y1 = e.originalEvent.clientY;
+//         L.DomEvent.stopPropagation(e.target);
+
+//         map.on('mousemove', mouseMove);
+
+//     }
+// }
+
+// function mouseUp(e) {
+//     // selectBox.hidden = 1;
+//     map.off('mousemove', mouseMove);
+// }
+
+// map.on('mousedown', mouseDown);
+// map.on('mouseup', mouseUp);
+
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
         mouseout: mouseOut,
-        click: onClick
+        click: onClick,
     });
 }
+
+
+
+// L.DomUtil.create('div', 'select-box', document.body);
+// var selectBox = document.getElementsByClassName('select-box')[0];
+// var selectBox =
+// var selectBox = document.getElementById('select-box')
+
+// var selectBox = L.control();
+
+// selectBox.onAdd = function (map) {
+//     this.div = L.DomUtil.create("div", "select-box");
+//     return this.div;
+// };
+// selectBox.addTo(map);
+
+
+// var legend = L.control({position: 'bottomright'});
+
+// legend.onAdd = function (map) {
+//     var bins = geojson.bins,
+//         fills = geojson.fills;
+//     // bins.push(1);
+
+//     this.div = L.DomUtil.create('div', 'info legend');
+//     var labels = [],
+
+
 
 keydownListener = function(e){
     // console.log(current_time);
@@ -395,6 +530,3 @@ legend.addTo(map);
 
 
 //		'['+bins[i] + (i<bins.length-1) ? ('&mdash;' + bins[i+1]+')') : '+');
-
-
-

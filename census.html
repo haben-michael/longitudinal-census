@@ -8,9 +8,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet"
-	      href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+	      href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
         <link href="http://skeate.github.io/Leaflet.timeline/stylesheets/leaflet.timeline.css" rel="stylesheet" />
-	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
         <script src="http://skeate.github.io/Leaflet.timeline/javascripts/leaflet.timeline.js"></script>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -142,6 +142,25 @@
 	  -moz-transition: opacity .55s ease-in-out;
 	  -webkit-transition: opacity .55s ease-in-out;
 	  }
+          .select-box {
+          border: 1px dotted #000;
+          position: absolute;
+          }
+          #select-box {
+          border: 1px dotted #000;
+          position: absolute;
+          background-color: black;
+          }
+          <!-- .select-box { -->
+          <!-- top: 200px ; -->
+          <!-- left: -500px; -->
+          <!-- width: 150px ; -->
+          <!-- height: 150px; -->
+          <!-- border: 10px solid black ; -->
+          <!-- position: absolute; -->
+          <!-- float: none; -->
+          <!-- background-color: rgba(.5,.5,.5,.5); -->
+          <!-- } -->
 	  #covariate-list-container {
 	  margin: 3px 0px 00px -50px;
 	  visibility: hidden;
@@ -189,9 +208,9 @@
         <!--   </style> -->
 </head>
 <body>
+  <!-- <div id='select-box'></div> -->
 
-  <div id='map'></div>
-
+  <div id='map' class="leaflet-container leaflet-touch-zoom"></div>
   <script type="text/javascript" src="MA_data.js"></script>
 
   <script type="text/javascript" src="census.js"></script>
