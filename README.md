@@ -12,6 +12,6 @@ The current build is in javascript (leaflet and D3) but an R/shiny implementatio
 A statistic using census variable names may be input in the upper right form. The left/right arrow keys advance the map through the decades. Left clicking on a tract plots the statistic over the decennial census data included (1970-2010).
 
 ## TODO
-  * average over several tracts after selecting with mouse
   * choice of color gradient--need diverging for neg/pos values
   * bins issue--quantiles lump large ranges
+  * switch between average and sum of stats in svg plot

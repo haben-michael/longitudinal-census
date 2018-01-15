@@ -5,24 +5,39 @@
 //https://gis.stackexchange.com/questions/104507/disable-panning-dragging-on-leaflet-map-for-div-within-map
 //doesnt shift timeline when initially loaded; must navigate with mouse first
 
-// formula = "POPYY";
-formula = '(NHBLKYY+HISPYY-NHWHTYY-ASIANYY)/POPYY';
+formula = "POPYY";
+// formula = 'NHBLKYY/POPYY';
 var n_colors = 10;
 var spectrum = d3.interpolatePRGn;
 // var counter = 0;
 var current_time = 0;
 formula = String(formula).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
-data.features.forEach(f => {
-    f.geometry.minLat = f.geometry.minLon = Infinity;
-    f.geometry.maxLat = f.geometry.maxLon = -Infinity;
-    f.geometry.coordinates[0][0].forEach(x => {
-        if (x[0] < f.geometry.minLat) f.geometry.minLat = x[0];
-        if (x[1] < f.geometry.minLon) f.geometry.minLon = x[1];
-        if (x[0] > f.geometry.maxLat) f.geometry.maxLat = x[0];
-        if (x[1] > f.geometry.maxLon) f.geometry.maxLon = x[1];
-    });
-});
+// data.features.forEach(f => {
+//     // f.geometry.minLat = f.geometry.minLon = Infinity;
+//     // f.geometry.maxLat = f.geometry.maxLon = -Infinity;
+//     f.geometry.bbox = {}; f.geometry.bbox.ul = f.geometry.bbox.lr = {};
+//     f.geometry.bbox.ul['lat'] = -Infinity; f.geometry.bbox.ul['lng'] = Infinity;
+//     f.geometry.bbox.lr['lat'] = Infinity; f.geometry.bbox.lr['lng'] = -Infinity;
+//     f.geometry.coordinates[0][0].forEach(x => {
+//         with (f.geometry.bbox) {
+//             if (x[0] > lr['lng']) {
+//                 lr['lng'] = x[0];
+//             } else {
+//                 if (x[0] < ul['lng']) lr['lng'] = x[0];
+//             }
+//             if (x[1] < lr['lat']) {
+//                 lr['lat'] = x[1];
+//             } else {
+//                 if (x[1] > ul['lat']) ul['lat'] = x[1];
+//             }
+//         }
+//         // if (x[0] < f.geometry.minLat) f.geometry.minLat = x[0];
+//         // if (x[1] < f.geometry.minLon) f.geometry.minLon = x[1];
+//         // if (x[0] > f.geometry.maxLat) f.geometry.maxLat = x[0];
+//         // if (x[1] > f.geometry.maxLon) f.geometry.maxLon = x[1];
+//     });
+// });
 
 
 // updateStats();
@@ -40,66 +55,114 @@ L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
 map.attributionControl.setPrefix('');
 
 
-// L.DomUtil.create('div', 'select-box', document.body);
-// var selectBox = document.getElementsByClassName('select-box')[0];
+L.DomUtil.create('div', 'select-box', document.body);
+var selectBox = document.getElementsByClassName('select-box')[0];
 
 // interaction handlers
-// function getNewFormula(e){
-//     e.preventDefault();
-//     new_formula = document.getElementById('formula').value
+function getNewFormula(e){
+    e.preventDefault();
+    new_formula = document.getElementById('formula').value
 
-//     // new_formula = prompt("new formula",String(formula));
-//     if (new_formula) formula = new_formula;
-//     geojson.updateStats(formula);
-//     geojson.setFillColors(n_colors);
-//     legend.addTo(map);
-// }
+    // new_formula = prompt("new formula",String(formula));
+    if (new_formula) formula = new_formula;
+    geojson.updateStats(formula);
+    geojson.setFillColors(n_colors);
+    legend.addTo(map);
+}
 
-// function listCovariates() {
-//     var overlay = document.getElementById('covariate-list-container');
-//     overlay.style.visibility = (overlay.style.visibility=='visible') ? 'hidden' : 'visible';
-//     document.getElementById('covariate-list').innerHTML = Object.keys(geojson.getLayers()[0].feature.properties).join('<br/>');
+function listCovariates() {
+    var overlay = document.getElementById('covariate-list-container');
+    overlay.style.visibility = (overlay.style.visibility=='visible') ? 'hidden' : 'visible';
+    document.getElementById('covariate-list').innerHTML = Object.keys(geojson.getLayers()[0].feature.properties).join('<br/>');
 
-// }
+}
 
-// function updateStats(formula) {
-//     formulas = []
-//     for(var i=0; i<times.length; i++) {
-// 	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
-//     }
-//     data.features.forEach(function(feature) {
-// 	feature.stats = [];
-// 	with(feature.properties) {
-//             for(var i=0; i<formulas.length; i++) {
-// 		feature.stats.push(eval(formulas[i]));
-//             }
-// 	}
-//     })
-
-
-// }
+function updateStats(formula) {
+    formulas = []
+    for(var i=0; i<times.length; i++) {
+	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+    }
+    data.features.forEach(function(feature) {
+	feature.stats = [];
+	with(feature.properties) {
+            for(var i=0; i<formulas.length; i++) {
+		feature.stats.push(eval(formulas[i]));
+            }
+	}
+    })
 
 
-map.on("boxzoomend", function(e) {
-    alert('!');
-    L.DomEvent.stopPropagation(e.target);
+}
 
-});
 
-map.boxZoom._onMouseUp = function(e){alert('!')};
-// L.Map.BoxPrinter = L.Map.BoxZoom.extend({
-//     _onMouseUp: function (e) {
-//         alert('!');
-//         this._map.fire('boxzoomend', {boxZoomBounds: bounds});
-//    }
-// })
-// L.Map.mergeOptions({boxPrinter: true});
-// L.Map.addInitHook('addHandler', 'boxPrinter', L.Map.BoxPrinter);
+// map.on("boxzoomend", function(e) {
+//     alert('!');
+//     L.DomEvent.stopPropagation(e.target);
 
-// L.Map.mergeOptions({boxZoom: false});
+// });
 
-function highlightFeature(e) {
-    var layer = e.target;
+// origin at lower right
+
+selectedLayers = [];
+
+function printAverageStats() {
+    var averageStats = Array(times.length).fill(0);
+        selectedLayers.forEach(function(target) {
+            for (var i=0; i < times.length; i++) {
+                averageStats[i] += target.feature.properties.stat[i];
+            }
+        })
+        averageStats = averageStats.map(function(stat) {return stat/times.length;});
+    info.drawSVG(times,averageStats);
+}
+
+boxZoomMouseUp = function(e){
+    var newSelectedLayers = [];
+    var boxIntersect = function(ul1,lr1,ul2,lr2) {
+        return (ul1['lat'] > lr2['lat']) && (ul2['lat'] > lr1['lat']) && (ul1['lng'] < lr2['lng']) && (ul2['lng'] < lr1['lng']);
+    }
+    var boxContainsPoint = function(ul,lr,lng,lat) {
+        return( ul['lat'] > lat && lr['lat'] < lat && ul['lng'] < lng && lr['lng'] > lng);
+    }
+
+    if ((e.which !== 1) && (e.button !== 1)) { return; }
+
+    this._finish();
+
+    if (!this._moved) { return; }
+    this._clearDeferredResetState();
+    this._resetStateTimeout = setTimeout(L.Util.bind(this._resetState, this), 0);
+
+
+    startPoint = this._map.containerPointToLatLng(this._startPoint);
+    endPoint = this._map.containerPointToLatLng(this._point);
+    var ul = {}; var lr = {};
+    ul.lat = Math.max(startPoint.lat, endPoint.lat); ul.lng = Math.min(startPoint.lng, endPoint.lng);
+    lr.lat = Math.min(startPoint.lat, endPoint.lat); lr.lng = Math.max(startPoint.lng, endPoint.lng);
+    geojson.getLayers().forEach(layer => {
+        if(boxIntersect(layer.feature.geometry.bbox.ul, layer.feature.geometry.bbox.lr, ul, lr))
+            newSelectedLayers.push(layer);
+    });
+    newSelectedLayers.forEach(layer => {
+        with (layer.feature.geometry) {
+            for(var i=0; i<coordinates[0][0].length; i++) {
+                if (boxContainsPoint(ul,lr,coordinates[0][0][i].lat, coordinates[0][0][i].lng)) {
+                    selectedLayers.push(layer);
+                    break;
+                }
+            }
+        }
+    })
+
+    selectedLayers = selectedLayers.concat(newSelectedLayers);
+    selectedLayers.forEach(layer => {highlightFeature(layer)});
+    printAverageStats();
+
+}
+
+
+function highlightFeature(layer) {
+    // var layer = e.target;
 
     layer.setStyle({
         weight: .5,
@@ -112,27 +175,23 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 
-    if(!e.originalEvent.shiftKey) {
-        info.update(layer.feature.properties);
-    }
-//    info.drawSVG([2009, 2010, 2011],[20,40,15]);
 
 }
 
-// function resetHighlight(e) {
-//     // e.target.setStyle({fillColor : e.target.feature.properties.fill[current_time]});
-//     if(!e.originalEvent.shiftKey) {
-//         geojson.resetStyle(e.target);
-//         info.update();
-//     }
 
-// }
+function mouseOver(e) {
+    highlightFeature(e.target);
 
-var selectedFeatures = [];
+    if(!e.originalEvent.shiftKey) {
+        info.update(e.target.feature.properties);
+    }
+}
+
+//var selectedLayers = [];
 
 
 function mouseOut(e) {
-    if(selectedFeatures.indexOf(e.target)==-1) {
+    if(selectedLayers.indexOf(e.target)==-1) {
         geojson.resetStyle(e.target);
         info.update();
     }
@@ -146,133 +205,22 @@ function mouseOut(e) {
 
 function onClick(e) {
     if (e.originalEvent.shiftKey) {
-        if(selectedFeatures.indexOf(e.target)==-1) selectedFeatures.push(e.target);
-        averageStats = Array(times.length).fill(0);
-        selectedFeatures.forEach(function(target) {
-            for (var i=0; i < times.length; i++) {
-                averageStats[i] += target.feature.properties.stat[i];
-            }
-        })
-        averageStats = averageStats.map(function(stat) {return stat/times.length;});
-        info.drawSVG(times,averageStats);
-        // L.DomEvent.stopPropagation(e.target);
+        idx = selectedLayers.indexOf(e.target)
+        if(idx==-1) {
+            selectedLayers.push(e.target);
+        } else {
+            selectedLayers.splice(idx, 1);
+        }
+        printAverageStats();
     } else {
-        selectedFeatures.forEach(function(target) {geojson.resetStyle(target);})
+        selectedLayers.forEach(function(target) {geojson.resetStyle(target);})
         info.update();
-        selectedFeatures = [];
+        selectedLayers = [];
         // map.fitBounds(e.target.getBounds());
         // map.setView(e.target.getCenter());
         info.drawSVG(times,e.target.feature.properties.stat);
     }
 }
-
-
-x1 = 0, y1 = 0, x2 = 0, y2 = 0
-;
-function reCalc() { //This will restyle the div
-    // var x3 = Math.min(x1,x2); //Smaller X
-    // var x4 = Math.max(x1,x2); //Larger X
-    // var y3 = Math.min(y1,y2); //Smaller Y
-    // var y4 = Math.max(y1,y2); //Larger Y
-    var minX = Math.min(x1,x2);
-    var maxX = Math.max(x1,x2);
-    var minY = Math.min(y1,y2);
-    var maxY = Math.max(y1,y2);
-    selectBox.div.style.left = minX  + 'px';
-    selectBox.div.style.top = minY + 'px';
-    selectBox.div.style.width = (maxX - minX) + 'px';
-    selectBox.div.style.height = (maxY - minY) + 'px';
-    selectBox.div.style.border = '10px solid black' ;
-    selectBox.div.style.visibility = 'block';
-    selectBox.div.style.hidden = 0;
-    selectBox.div.style.position = 'absolute';
-}
-
-// function reCalc() { //This will restyle the div
-//     // var x3 = Math.min(x1,x2); //Smaller X
-//     // var x4 = Math.max(x1,x2); //Larger X
-//     // var y3 = Math.min(y1,y2); //Smaller Y
-//     // var y4 = Math.max(y1,y2); //Larger Y
-//     var minX = Math.min(x1,x2);
-//     var maxX = Math.max(x1,x2);
-//     var minY = Math.min(y1,y2);
-//     var maxY = Math.max(y1,y2);
-//     selectBox.style.left = minX  + 'px';
-//     selectBox.style.top = minY + 'px';
-//     selectBox.style.width = (maxX - minX) + 'px';
-//     selectBox.style.height = (maxY - minY) + 'px';
-//     selectBox.style.border = '10px solid black' ;
-//     selectBox.style.visibility = 'block';
-//     selectBox.style.hidden = 0;
-//     selectBox.style.position = 'absolute';
-// }
-
-// function mouseMove(e) {
-//     if(e.originalEvent.shiftKey) {
-//         x2 = e.originalEvent.clientX;
-//         y2 = e.originalEvent.clientY;
-//         reCalc();
-//                 // L.DomEvent.stopPropagation(e.target);
-
-//     }
-// }
-
-// function mouseDown(e) {
-//     // alert(e.originalEvent.clientX)
-//     if(e.originalEvent.shiftKey) {
-//         // selectBox.div.hidden = 0;
-//         // selectBox.div.style.visibility = 'block';
-//         x1 = e.originalEvent.clientX;
-//         y1 = e.originalEvent.clientY;
-//         L.DomEvent.stopPropagation(e.target);
-
-//         map.on('mousemove', mouseMove);
-
-//     }
-// }
-
-// function mouseUp(e) {
-//     // selectBox.hidden = 1;
-//     map.off('mousemove', mouseMove);
-// }
-
-// map.on('mousedown', mouseDown);
-// map.on('mouseup', mouseUp);
-
-function onEachFeature(feature, layer) {
-    layer.on({
-        mouseover: highlightFeature,
-        mouseout: mouseOut,
-        click: onClick,
-    });
-}
-
-
-
-// L.DomUtil.create('div', 'select-box', document.body);
-// var selectBox = document.getElementsByClassName('select-box')[0];
-// var selectBox =
-// var selectBox = document.getElementById('select-box')
-
-// var selectBox = L.control();
-
-// selectBox.onAdd = function (map) {
-//     this.div = L.DomUtil.create("div", "select-box");
-//     return this.div;
-// };
-// selectBox.addTo(map);
-
-
-// var legend = L.control({position: 'bottomright'});
-
-// legend.onAdd = function (map) {
-//     var bins = geojson.bins,
-//         fills = geojson.fills;
-//     // bins.push(1);
-
-//     this.div = L.DomUtil.create('div', 'info legend');
-//     var labels = [],
-
 
 
 keydownListener = function(e){
@@ -293,6 +241,18 @@ keydownListener = function(e){
     geojson.updateTime(current_time);
    // L.DomEvent.stopPropagation(e);
 }
+
+// add hooks
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: mouseOver,
+        mouseout: mouseOut,
+        click: onClick,
+    });
+}
+
+
+map.boxZoom._onMouseUp = boxZoomMouseUp;
 
 document.getElementById('map').addEventListener("keydown",keydownListener);
 
@@ -317,17 +277,36 @@ geojson.updateStats = function() {
 	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
     }
 
-    this.getLayers().forEach(function(e) {
-    e.feature.properties.stat = [0,0,0,0];
-	with(e.feature.properties) {
-	    e.feature.properties.stat = [];
+    this.getLayers().forEach(layer => {
+        layer.feature.properties.stat = [0,0,0,0];
+	with(layer.feature.properties) {
+	    layer.feature.properties.stat = [];
             for(var i=0; i<formulas.length; i++) {
-    		e.feature.properties.stat.push(eval(formulas[i]));
+    		layer.feature.properties.stat.push(eval(formulas[i]));
             }
 	}
+
+        with(layer.feature) {
+            geometry.bbox = {}; geometry.bbox.ul = geometry.bbox.lr = {};
+            geometry.bbox.ul['lat'] = -Infinity; geometry.bbox.ul['lng'] = Infinity;
+            geometry.bbox.lr['lat'] = Infinity; geometry.bbox.lr['lng'] = -Infinity;
+        }
+        layer.feature.geometry.coordinates[0][0].forEach(x => {
+            with (layer.feature.geometry.bbox) {
+                if (x[0] > lr['lng']) {
+                    lr['lng'] = x[0];
+                } else {
+                    if (x[0] < ul['lng']) lr['lng'] = x[0];
+                }
+                if (x[1] < lr['lat']) {
+                    lr['lat'] = x[1];
+                } else {
+                    if (x[1] > ul['lat']) ul['lat'] = x[1];
+                }
+            }
+        })
     })
 }
-
 geojson.setFillColors = function(n_colors) {
     var bin_size = 1/n_colors;
     var range = [];
@@ -375,7 +354,7 @@ info.onAdd = function (map) {
 
 info.drawSVG = function(times,stats) {
     this._div.innerHTML = "";
-    var svg = d3.select(".info").append("svg").attr("height","300").attr("width","460"),//.style("height","500").style("width","960"),
+    var svg = d3.select(".info").append("svg").attr("height","300").attr("width","460"),
         margin = {top: 30, right: 20, bottom: 30, left: 40},
          width = +svg.attr("width") - margin.left - margin.right,
         height = +svg.attr("height") - margin.top - margin.bottom;
