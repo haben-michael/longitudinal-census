@@ -13,5 +13,13 @@ A statistic using census variable names may be input in the upper right form. Th
 
 ## TODO
   * choice of color gradient--need diverging for neg/pos values
-  * bins issue--quantiles lump large ranges
-  * switch between average and sum of stats in svg plot
+  * show some examples
+  * maybe change shift-drag outline style
+
+## EXAMPLES (TODO)
+    * basic example -- pop of each tract. variable years, cycling
+      through time (anim gif); list of available stats
+      * should be normalized by area -- formulas
+      * should be log normalized -- Math.log
+    * shift selection, shift drag; method of combining stats
+

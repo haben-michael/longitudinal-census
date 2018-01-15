@@ -12,6 +12,10 @@ var spectrum = d3.interpolatePRGn;
 // var counter = 0;
 var current_time = 0;
 formula = String(formula).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+formulas = []
+for(var i=0; i<times.length; i++) {
+    formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+}
 if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
 // data.features.forEach(f => {
 //     // f.geometry.minLat = f.geometry.minLon = Infinity;
@@ -105,16 +109,38 @@ function updateStats(formula) {
 
 selectedLayers = [];
 
-function printAverageStats() {
-    var averageStats = Array(times.length).fill(0);
-        selectedLayers.forEach(function(target) {
-            for (var i=0; i < times.length; i++) {
-                averageStats[i] += target.feature.properties.stat[i];
-            }
-        })
-        averageStats = averageStats.map(function(stat) {return stat/times.length;});
-    info.drawSVG(times,averageStats);
+
+plotSelectedLayers = function() {
+    if (selectedLayers.length==0) return;
+
+    // cumStat = selectedLayers[0].feature.properties.stat;
+
+    cumProperties = selectedLayers[0].feature.properties;
+    keys = Object.keys(cumProperties);
+
+    for (var i = 1; i<selectedLayers.length; i++) {
+        keys.forEach(key => cumProperties[key] += selectedLayers[i].feature.properties[key]);
+    }
+
+    cumStat = [];
+    for(var i=0; i<formulas.length; i++) {
+        with(cumProperties) {
+    	    cumStat.push(eval(formulas[i]));
+        }
+    }
+
+    info.drawSVG(times,cumStat);
 }
+// function printAverageStats() {
+//     var averageStats = Array(times.length).fill(0);
+//         selectedLayers.forEach(function(target) {
+//             for (var i=0; i < times.length; i++) {
+//                 averageStats[i] += target.feature.properties.stat[i];
+//             }
+//         })
+//         averageStats = averageStats.map(function(stat) {return stat/times.length;});
+//     info.drawSVG(times,averageStats);
+// }
 
 boxZoomMouseUp = function(e){
     var newSelectedLayers = [];
@@ -156,7 +182,7 @@ boxZoomMouseUp = function(e){
 
     selectedLayers = selectedLayers.concat(newSelectedLayers);
     selectedLayers.forEach(layer => {highlightFeature(layer)});
-    printAverageStats();
+    plotSelectedLayers();
 
 }
 
@@ -182,7 +208,8 @@ function highlightFeature(layer) {
 function mouseOver(e) {
     highlightFeature(e.target);
 
-    if(!e.originalEvent.shiftKey) {
+    // if(!e.originalEvent.shiftKey) {
+    if(selectedLayers.length==0) {
         info.update(e.target.feature.properties);
     }
 }
@@ -193,14 +220,13 @@ function mouseOver(e) {
 function mouseOut(e) {
     if(selectedLayers.indexOf(e.target)==-1) {
         geojson.resetStyle(e.target);
-        info.update();
+        // info.update();
     }
 }
 // function zoomToFeature(e) {
 //     map.fitBounds(e.target.getBounds());
 //     info.drawSVG(times,e.target.feature.properties.stat);
 // }
-
 
 
 function onClick(e) {
@@ -211,14 +237,14 @@ function onClick(e) {
         } else {
             selectedLayers.splice(idx, 1);
         }
-        printAverageStats();
+        plotSelectedLayers();
     } else {
         selectedLayers.forEach(function(target) {geojson.resetStyle(target);})
-        info.update();
-        selectedLayers = [];
-        // map.fitBounds(e.target.getBounds());
-        // map.setView(e.target.getCenter());
-        info.drawSVG(times,e.target.feature.properties.stat);
+        // info.update();
+        // selectedLayers = [];
+        // info.drawSVG(times,e.target.feature.properties.stat);
+        selectedLayers = [e.target];
+        plotSelectedLayers();
     }
 }
 
@@ -249,6 +275,25 @@ function onEachFeature(feature, layer) {
         mouseout: mouseOut,
         click: onClick,
     });
+    with(feature) {
+        geometry.bbox = {}; geometry.bbox.ul = geometry.bbox.lr = {};
+        geometry.bbox.ul['lat'] = -Infinity; geometry.bbox.ul['lng'] = Infinity;
+        geometry.bbox.lr['lat'] = Infinity; geometry.bbox.lr['lng'] = -Infinity;
+    }
+    feature.geometry.coordinates[0][0].forEach(x => {
+        with (feature.geometry.bbox) {
+            if (x[0] > lr['lng']) {
+                lr['lng'] = x[0];
+            } else {
+                if (x[0] < ul['lng']) lr['lng'] = x[0];
+            }
+            if (x[1] < lr['lat']) {
+                lr['lat'] = x[1];
+            } else {
+                if (x[1] > ul['lat']) ul['lat'] = x[1];
+            }
+        }
+    })
 }
 
 
@@ -272,13 +317,13 @@ var geojson = L.geoJson(data,
 
 
 geojson.updateStats = function() {
-    formulas = []
-    for(var i=0; i<times.length; i++) {
-	formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
-    }
+    // formulas = []
+    // for(var i=0; i<times.length; i++) {
+    //     formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+    // }
 
     this.getLayers().forEach(layer => {
-        layer.feature.properties.stat = [0,0,0,0];
+        // layer.feature.properties.stat = [0,0,0,0];
 	with(layer.feature.properties) {
 	    layer.feature.properties.stat = [];
             for(var i=0; i<formulas.length; i++) {
@@ -286,25 +331,25 @@ geojson.updateStats = function() {
             }
 	}
 
-        with(layer.feature) {
-            geometry.bbox = {}; geometry.bbox.ul = geometry.bbox.lr = {};
-            geometry.bbox.ul['lat'] = -Infinity; geometry.bbox.ul['lng'] = Infinity;
-            geometry.bbox.lr['lat'] = Infinity; geometry.bbox.lr['lng'] = -Infinity;
-        }
-        layer.feature.geometry.coordinates[0][0].forEach(x => {
-            with (layer.feature.geometry.bbox) {
-                if (x[0] > lr['lng']) {
-                    lr['lng'] = x[0];
-                } else {
-                    if (x[0] < ul['lng']) lr['lng'] = x[0];
-                }
-                if (x[1] < lr['lat']) {
-                    lr['lat'] = x[1];
-                } else {
-                    if (x[1] > ul['lat']) ul['lat'] = x[1];
-                }
-            }
-        })
+        // with(layer.feature) {
+        //     geometry.bbox = {}; geometry.bbox.ul = geometry.bbox.lr = {};
+        //     geometry.bbox.ul['lat'] = -Infinity; geometry.bbox.ul['lng'] = Infinity;
+        //     geometry.bbox.lr['lat'] = Infinity; geometry.bbox.lr['lng'] = -Infinity;
+        // }
+        // layer.feature.geometry.coordinates[0][0].forEach(x => {
+        //     with (layer.feature.geometry.bbox) {
+        //         if (x[0] > lr['lng']) {
+        //             lr['lng'] = x[0];
+        //         } else {
+        //             if (x[0] < ul['lng']) lr['lng'] = x[0];
+        //         }
+        //         if (x[1] < lr['lat']) {
+        //             lr['lat'] = x[1];
+        //         } else {
+        //             if (x[1] > ul['lat']) ul['lat'] = x[1];
+        //         }
+        //     }
+        // })
     })
 }
 geojson.setFillColors = function(n_colors) {
@@ -355,7 +400,7 @@ info.onAdd = function (map) {
 info.drawSVG = function(times,stats) {
     this._div.innerHTML = "";
     var svg = d3.select(".info").append("svg").attr("height","300").attr("width","460"),
-        margin = {top: 30, right: 20, bottom: 30, left: 40},
+        margin = {top: 30, right: 20, bottom: 30, left: 60},
          width = +svg.attr("width") - margin.left - margin.right,
         height = +svg.attr("height") - margin.top - margin.bottom;
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -508,4 +553,3 @@ legend.addTo(map);
 
 
 
-//		'['+bins[i] + (i<bins.length-1) ? ('&mdash;' + bins[i+1]+')') : '+');
