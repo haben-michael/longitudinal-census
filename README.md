@@ -15,6 +15,7 @@ A statistic using census variable names may be input in the upper right form. Th
   * choice of color gradient--need diverging for neg/pos values
   * show some examples
   * maybe change shift-drag outline style
+  * drop down list of available cities/regions to cycle through
 
 ## EXAMPLES (TODO)
     * basic example -- pop of each tract. variable years, cycling

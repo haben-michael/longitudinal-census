@@ -1,10 +1,3 @@
-//average over several tracts
-//choice of color gradient--need diverging for neg/pos values
-//bins issue--quantiles lump large ranges
-//disable keyboard/mouse handlers when editing infobox
-//https://gis.stackexchange.com/questions/104507/disable-panning-dragging-on-leaflet-map-for-div-within-map
-//doesnt shift timeline when initially loaded; must navigate with mouse first
-
 formula = "POPYY";
 // formula = 'NHBLKYY/POPYY';
 var n_colors = 10;
@@ -220,7 +213,7 @@ function mouseOver(e) {
 function mouseOut(e) {
     if(selectedLayers.indexOf(e.target)==-1) {
         geojson.resetStyle(e.target);
-        // info.update();
+        if(selectedLayers.length==0) info.update();
     }
 }
 // function zoomToFeature(e) {
@@ -245,6 +238,7 @@ function onClick(e) {
         // info.drawSVG(times,e.target.feature.properties.stat);
         selectedLayers = [e.target];
         plotSelectedLayers();
+        selectedLayers = [];
     }
 }
 
