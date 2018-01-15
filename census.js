@@ -311,10 +311,10 @@ var geojson = L.geoJson(data,
 
 
 geojson.updateStats = function() {
-    // formulas = []
-    // for(var i=0; i<times.length; i++) {
-    //     formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
-    // }
+    formulas = []
+    for(var i=0; i<times.length; i++) {
+        formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+    }
 
     this.getLayers().forEach(layer => {
         // layer.feature.properties.stat = [0,0,0,0];
