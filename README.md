@@ -22,7 +22,7 @@ A statistic using census variable names may be input in the upper right form. Th
 
     Pressing the `list` icon calls up a full list of available census variables.
 
-![](./img/ex1.png)
+![](./img/ex2.png)
 
 2. *Longitudinal measurement.* To get a longitudinal view of the number of individuals under 18, enter "A18UNDYY" in the formula box, replacing the year indicator with "YY." Doing so loads  "A18UND80," "A18UND90," "A18UND00," and "A18UND10," i.e., the variable as measured in the 1980, 1990, 2000, or 2010 censuses. The left and right arrow keys cycle through the years, with a timeline at the bottom of map.
 
