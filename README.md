@@ -16,13 +16,13 @@ A statistic using census variable names may be input in the upper right form. Th
   * drop down list of available cities/regions to cycle through
 
 ## EXAMPLES (TODO)
-*Basic choropleth.* Suppose we are interested in the number of individuals under age 18 in each Boston area census tract as measured in the most recent decennial census, 2010. The census variable is "A18UND10." Enter this variable in the formula box at the upper right to generate a choropleth for this variable.
+*Basic choropleth.* A *choropleth* map color codes areas on the map, e.g., census tracts, according to the value of a statistic, e.g., the number of individuals under age 18 as measured in the 2010 census. Enter the corresponding census variable, "A18UND10" in this case, in the formula box at the upper right to generate a choropleth for this variable.
 
 ![](./img/ex2.png)
 
 Clicking the `list` icon calls up a full list of available census variables.
 
-*Longitudinal measurement.* To get a longitudinal view of the number of individuals under 18, enter "A18UNDYY" in the formula box, replacing the year indicator with "YY." Doing so loads  "A18UND80," "A18UND90," "A18UND00," and "A18UND10," i.e., the variable as measured in the 1980, 1990, 2000, or 2010 censuses. The left and right arrow keys cycle through the years, with a timeline at the bottom of map.
+*Longitudinal measurement.* To get a longitudinal view of the number of individuals under 18, enter "A18UNDYY" in the formula box, replacing the year indicator with "YY." Doing so loads  "A18UND80," "A18UND90," "A18UND00," and "A18UND10," i.e., the variable as measured in the 1980, 1990, 2000, or 2010 censuses. The left and right arrow keys cycle through the years, with a timeline at the bottom of map indicating the current view.
 
 ![](./img/ex3.png)
 
@@ -42,8 +42,7 @@ In fact, the formula box will execute the expression as javascript in an environ
 
 ![](./img/ex8.png)
 
-The figure plotted is obtained by summing the census statistics for each of the select tracts.
+The figure plotted is obtained by summing the census statistics for each of the select tracts. As a result, the plot is usually only meaningful for census count variables.
 
 ![](./img/ex7.png)
 
-As a result, the plot is usually only meaningful for census count variables.
