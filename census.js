@@ -10,39 +10,7 @@ for(var i=0; i<times.length; i++) {
     formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
 }
 if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
-// data.features.forEach(f => {
-//     // f.geometry.minLat = f.geometry.minLon = Infinity;
-//     // f.geometry.maxLat = f.geometry.maxLon = -Infinity;
-//     f.geometry.bbox = {}; f.geometry.bbox.ul = f.geometry.bbox.lr = {};
-//     f.geometry.bbox.ul['lat'] = -Infinity; f.geometry.bbox.ul['lng'] = Infinity;
-//     f.geometry.bbox.lr['lat'] = Infinity; f.geometry.bbox.lr['lng'] = -Infinity;
-//     f.geometry.coordinates[0][0].forEach(x => {
-//         with (f.geometry.bbox) {
-//             if (x[0] > lr['lng']) {
-//                 lr['lng'] = x[0];
-//             } else {
-//                 if (x[0] < ul['lng']) lr['lng'] = x[0];
-//             }
-//             if (x[1] < lr['lat']) {
-//                 lr['lat'] = x[1];
-//             } else {
-//                 if (x[1] > ul['lat']) ul['lat'] = x[1];
-//             }
-//         }
-//         // if (x[0] < f.geometry.minLat) f.geometry.minLat = x[0];
-//         // if (x[1] < f.geometry.minLon) f.geometry.minLon = x[1];
-//         // if (x[0] > f.geometry.maxLat) f.geometry.maxLat = x[0];
-//         // if (x[1] > f.geometry.maxLon) f.geometry.maxLon = x[1];
-//     });
-// });
 
-
-// updateStats();
-
-
-
-
-// var map = L.map('map', {boxZoom: false}).setView([ 42.30381,-71.09435], 12);
 var map = L.map('map').setView([ 42.30381,-71.09435], 12);
 
 L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
@@ -51,7 +19,10 @@ L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
 }).addTo(map);
 map.attributionControl.setPrefix('');
 
-
+// window.onerror = function(msg, url, linenumber) {
+//     alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
+//     return true;
+// }
 L.DomUtil.create('div', 'select-box', document.body);
 var selectBox = document.getElementsByClassName('select-box')[0];
 
