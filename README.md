@@ -18,15 +18,17 @@ A statistic using census variable names may be input in the upper right form. Th
 ## EXAMPLES (TODO)
 1. *Basic choropleth.* Suppose we are interested in the number of individuals under age 18 in each Boston area census tract as measured in the most recent decennial census, 2010. The census variable is "A18UND10." By entering this variable in the formula box at the upper right a choropleth is generated for this variable.
 
-Pressing the `list` icon calls up a full list of available census variables.
+![](./img/ex1.png)
 
-2. *Longitudinal measurement.* To get a longitudinal view of the number of individuals under 18, enter "A18UNDYY" in the formula box, replacing the year indicator with "YY." Doing so loads  "A18UND80," "A18UND90," "A18UND00," and "A18UND10," i.e., the variable as measured in the 1980, 1990, 2000, or 2010 censuses. The left and right arrow keys cycle through the years, with a timeline at the bottom of map.
+    Pressing the `list` icon calls up a full list of available census variables.
 
 ![](./img/ex1.png)
 
-Clicking on a census tract generates a plot of the variable over the available time period.
+2. *Longitudinal measurement.* To get a longitudinal view of the number of individuals under 18, enter "A18UNDYY" in the formula box, replacing the year indicator with "YY." Doing so loads  "A18UND80," "A18UND90," "A18UND00," and "A18UND10," i.e., the variable as measured in the 1980, 1990, 2000, or 2010 censuses. The left and right arrow keys cycle through the years, with a timeline at the bottom of map.
 
-![](./img/ex2.png)
+
+ Clicking on a census tract generates a plot of the variable over the available time period.
+
 
 3. *Derived expressions.* For some purposes, not the number but proportional of individuals under 18 in each census tract may be the relevant measure. The proportion is the ratio of two census variables, "A18UNDYY" and "POPYY." The formula box accepts simple expressions of this type:
 
