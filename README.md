@@ -16,7 +16,7 @@ A statistic using census variable names may be input in the upper right form. Th
   * drop down list of available cities/regions to cycle through
 
 ## EXAMPLES (TODO)
-1. *Basic choropleth.* Suppose we are interested in the number of individuals under age 18 in each Boston area census tract as measured in the most recent decennial census, 2010. The census variable is "A18UND10." By entering this variable in the formula box at the upper right a choropleth is generated for this variable.
+1. *Basic choropleth.* Suppose we are interested in the number of individuals under age 18 in each Boston area census tract as measured in the most recent decennial census, 2010. The census variable is "A18UND10." Enter this variable in the formula box at the upper right to generate a choropleth for this variable.
 
 ![](./img/ex2.png)
 
@@ -39,6 +39,8 @@ A statistic using census variable names may be input in the upper right form. Th
 ![](./img/ex6.png)
 
 4. *Multiple regions.* In order to select several tracts, hold shift while clicking on each. Select all tracts within a square region by holding down shift while dragging with the mouse.
+
+![](./img/ex8.png)
 
     The figure plotted is obtained by summing the census statistics for each of the select tracts.
 
