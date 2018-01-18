@@ -6,6 +6,8 @@ Logan, John R., Zengwang Xu, and Brian J. Stults. 2014. "Interpolating US Decenn
 
 [Live version](https://htmlpreview.github.io/?https://github.com/haben-michael/longitudinal-census/blob/master/census.html)
 
+Update: The authors on the paper have since put out [their own visualization](https://s4.ad.brown.edu/projects/diversity/Researcher/MapLTDB.htm) of their interpolated data.
+
 ## USAGE
 A statistic using census variable names may be input in the upper right form. The left/right arrow keys advance the map through the decades. Left clicking on a tract plots the statistic over the 4 decennial census data periods included (1970-2010).
 
