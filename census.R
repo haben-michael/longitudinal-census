@@ -17,14 +17,19 @@ palette <- 'Blues'#'RdBu'
 
 
 states <- 'MA'
-counties <- c('Suffolk County','Middlesex County')
-shapefile <- 'tl_2010_25_tract10'
-data <- read.csv(paste0('LTDB_Std_',years[1],'_fullcount.csv'),stringsAsFactor=F)
+counties <- c('Suffolk County','Middlesex County','Norfolk County')
+shapefile <- 'shapefiles/tl_2010_25_tract10'
+states <- 'CA'
+counties <- c('San Francisco County','San Mateo County','Santa Clara County')
+shapefile <- 'shapefiles/tl_2010_06_tract10'
+
+
+data <- read.csv(paste0('LTDB/LTDB_Std_',years[1],'_fullcount.csv'),stringsAsFactor=F)
 data <- filter(data,state %in% states & county %in% counties)
 fips.table <-
-    subset(data,!duplicated(data$county),select=c('TRTID10','county')) %>% mutate(county.fips=substr(TRTID10,3,5))
+    subset(data,!duplicated(data$county),select=c('TRTID10','county')) %>% mutate(TRT_padded = str_pad(as.character(TRTID10),11,'left','0')) %>% mutate(county.fips=substr(TRT_padded,3,5))
 for(year in years[-1]) {
-    data.year <- read.csv(paste0('LTDB_Std_',year,'_fullcount.csv'),stringsAsFactor=F)
+    data.year <- read.csv(paste0('LTDB/LTDB_Std_',year,'_fullcount.csv'),stringsAsFactor=F)
     data.year <- filter(data.year,state %in% states & county %in% counties)
     data <- left_join(data,data.year)
 }
@@ -70,7 +75,8 @@ features[[2]] <- lapply(features[[2]],function(feature) {
     feature
 })
 
-export.json <- list(bins=as.numeric(quantile(stats,attr(pal,'colorArgs')$probs)) %>% round(2),
+export.json <- list(startLatLng = geodata@polygons[sample(length(geodata@polygons),1)][[1]]@Polygons[[1]]@coords[1,],
+                    bins=as.numeric(quantile(stats,attr(pal,'colorArgs')$probs)) %>% round(2),
                     fills=pal(quantile(stats,attr(pal,'colorArgs')$probs[-1])),
                     formula=as.character(formula),
                     times=years,

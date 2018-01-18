@@ -11,7 +11,8 @@ for(var i=0; i<times.length; i++) {
 }
 if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
 
-var map = L.map('map').setView([ 42.30381,-71.09435], 12);
+// var map = L.map('map').setView([ 42.30381,-71.09435], 12);
+var map = L.map('map').setView([ startLatLng[1], startLatLng[0]], 12);
 
 L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
     maxZoom: 18,
