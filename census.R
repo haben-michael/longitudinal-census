@@ -9,7 +9,7 @@ setwd('/gdrive/scripts/census')
 
 
 years <- c(1980,1990,2000,2010)
-## years <- 1980
+ ## years <- 1980
 formula <- "100*<RACWHT>_$YY$-100*<RACWHT>_$YY-1$"
 formula <- "<AGEP>_$YY$"
 formula <- 'HISPYY/POPYY'

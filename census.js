@@ -1,33 +1,10 @@
-formula = "POPYY";
-// formula = 'NHBLKYY/POPYY';
-var n_colors = 10;
-var spectrum = d3.interpolatePRGn;
-// var counter = 0;
+var selectedLayers = [];
 var current_time = 0;
-formula = String(formula).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-formulas = []
-for(var i=0; i<times.length; i++) {
-    formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
-}
-if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
+var map;
 
-// var map = L.map('map').setView([ 42.30381,-71.09435], 12);
-var map = L.map('map').setView([ startLatLng[1], startLatLng[0]], 12);
-
-L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: 'Positron'
-}).addTo(map);
-map.attributionControl.setPrefix('');
-
-// window.onerror = function(msg, url, linenumber) {
-//     alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
-//     return true;
-// }
-L.DomUtil.create('div', 'select-box', document.body);
-var selectBox = document.getElementsByClassName('select-box')[0];
-
-// interaction handlers
+/*------------------------------------------------------------------------------
+ interaction handlers
+------------------------------------------------------------------------------*/
 function getNewFormula(e){
     e.preventDefault();
     new_formula = document.getElementById('formula').value
@@ -63,18 +40,6 @@ function updateStats(formula) {
 
 }
 
-
-// map.on("boxzoomend", function(e) {
-//     alert('!');
-//     L.DomEvent.stopPropagation(e.target);
-
-// });
-
-// origin at lower right
-
-selectedLayers = [];
-
-
 plotSelectedLayers = function() {
     if (selectedLayers.length==0) return;
 
@@ -96,16 +61,6 @@ plotSelectedLayers = function() {
 
     info.drawSVG(times,cumStat);
 }
-// function printAverageStats() {
-//     var averageStats = Array(times.length).fill(0);
-//         selectedLayers.forEach(function(target) {
-//             for (var i=0; i < times.length; i++) {
-//                 averageStats[i] += target.feature.properties.stat[i];
-//             }
-//         })
-//         averageStats = averageStats.map(function(stat) {return stat/times.length;});
-//     info.drawSVG(times,averageStats);
-// }
 
 boxZoomMouseUp = function(e){
     var newSelectedLayers = [];
@@ -188,11 +143,6 @@ function mouseOut(e) {
         if(selectedLayers.length==0) info.update();
     }
 }
-// function zoomToFeature(e) {
-//     map.fitBounds(e.target.getBounds());
-//     info.drawSVG(times,e.target.feature.properties.stat);
-// }
-
 
 function onClick(e) {
     if (e.originalEvent.shiftKey) {
@@ -263,97 +213,77 @@ function onEachFeature(feature, layer) {
 }
 
 
-map.boxZoom._onMouseUp = boxZoomMouseUp;
+/*------------------------------------------------------------------------------
+ geojson
+------------------------------------------------------------------------------*/
 
-document.getElementById('map').addEventListener("keydown",keydownListener);
-
-
-
-
-//geojson
-var geojson = L.geoJson(data,
-                        {onEachFeature: onEachFeature,
-                         style: function(feature){
-                            return {
-                                weight : 0,
-                                // color : "black",
-                                fillColor :  feature.properties.fill[current_time],
-                                fillOpacity : .3
-                            }}})
+loadGeojson = function(data, current_time, spectrum) {
+    var geojson = L.geoJson(data,
+                            {onEachFeature: onEachFeature,
+                             style: function(feature){
+                                 return {
+                                     weight : 0,
+                                     // color : "black",
+                                     fillColor :  feature.properties.fill[current_time],
+                                     fillOpacity : .3
+                                 }}})
 
 
-geojson.updateStats = function() {
-    formulas = []
-    for(var i=0; i<times.length; i++) {
-        formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+    geojson.updateStats = function(formula) {
+        formulas = []
+        for(var i=0; i<times.length; i++) {
+            formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+        }
+
+        this.getLayers().forEach(layer => {
+            // layer.feature.properties.stat = [0,0,0,0];
+	    with(layer.feature.properties) {
+	        layer.feature.properties.stat = [];
+                for(var i=0; i<formulas.length; i++) {
+    		    layer.feature.properties.stat.push(eval(formulas[i]));
+                }
+	    }
+        })
+    }
+    geojson.setFillColors = function(n_colors) {
+        var bin_size = 1/n_colors;
+        var range = [];
+        for (var n=0; n<=n_colors-1; n++) range.push( (n*bin_size+(n+1)*bin_size)/2);
+        var stats = [];
+        this.getLayers().forEach(e =>
+                                 stats.push(...e.feature.properties.stat));
+        var scale = d3.scaleQuantile().domain(stats).range(range);
+
+        this.getLayers().forEach(e =>
+                                 {
+				     e.feature.properties.fill = e.feature.properties.stat.map(s => spectrum(scale(s)));
+				     e.setStyle({fillColor : e.feature.properties.fill[current_time]});
+			         }
+			        );
+
+        geojson.bins = [0].concat(scale.quantiles().map(x => +x.toFixed(2)));
+        geojson.fills = range.map(x => spectrum(x));
+
     }
 
-    this.getLayers().forEach(layer => {
-        // layer.feature.properties.stat = [0,0,0,0];
-	with(layer.feature.properties) {
-	    layer.feature.properties.stat = [];
-            for(var i=0; i<formulas.length; i++) {
-    		layer.feature.properties.stat.push(eval(formulas[i]));
-            }
-	}
 
-        // with(layer.feature) {
-        //     geometry.bbox = {}; geometry.bbox.ul = geometry.bbox.lr = {};
-        //     geometry.bbox.ul['lat'] = -Infinity; geometry.bbox.ul['lng'] = Infinity;
-        //     geometry.bbox.lr['lat'] = Infinity; geometry.bbox.lr['lng'] = -Infinity;
-        // }
-        // layer.feature.geometry.coordinates[0][0].forEach(x => {
-        //     with (layer.feature.geometry.bbox) {
-        //         if (x[0] > lr['lng']) {
-        //             lr['lng'] = x[0];
-        //         } else {
-        //             if (x[0] < ul['lng']) lr['lng'] = x[0];
-        //         }
-        //         if (x[1] < lr['lat']) {
-        //             lr['lat'] = x[1];
-        //         } else {
-        //             if (x[1] > ul['lat']) ul['lat'] = x[1];
-        //         }
-        //     }
-        // })
-    })
-}
-geojson.setFillColors = function(n_colors) {
-    var bin_size = 1/n_colors;
-    var range = [];
-    for (var n=0; n<=n_colors-1; n++) range.push( (n*bin_size+(n+1)*bin_size)/2);
-    var stats = [];
-    this.getLayers().forEach(e =>
-                             stats.push(...e.feature.properties.stat));
-    var scale = d3.scaleQuantile().domain(stats).range(range);
 
-    this.getLayers().forEach(e =>
-                             {
-				 e.feature.properties.fill = e.feature.properties.stat.map(s => spectrum(scale(s)));
-				 e.setStyle({fillColor : e.feature.properties.fill[current_time]});
-			     }
-			    );
+    geojson.updateTime = function(new_time) {
+        //set feature colors
+        this.getLayers().forEach(e =>
+                                 e.setStyle({fillColor : e.feature.properties.fill[new_time]}));
+        //set legend colors
+    }
 
-    geojson.bins = [0].concat(scale.quantiles().map(x => +x.toFixed(2)));
-    geojson.fills = range.map(x => spectrum(x));
-
+    return(geojson);
 }
 
-
-
-geojson.updateTime = function(new_time) {
-    //set feature colors
-    this.getLayers().forEach(e =>
-                             e.setStyle({fillColor : e.feature.properties.fill[new_time]}));
-    //set legend colors
-}
-
-geojson.updateStats(formula);
-geojson.setFillColors(n_colors);
-geojson.updateTime(current_time);
-geojson.addTo(map);
+/*------------------------------------------------------------------------------
+ leaflet controls
+------------------------------------------------------------------------------*/
 
 //info box
+
 var info = L.control();
 
 info.onAdd = function (map) {
@@ -422,12 +352,7 @@ info.update = function (properties) {
            : '(no selection) |<button id=property-list>list</button>');
     this._div.innerHTML += `<div id="covariate-list-container"><div id="covariate-list" class="info"></div></div>`;
 
-    //  this._div.innerHTML += `
-    // <form id="frm1">
-    //   First name: <input type="text" name="fname" value="Donald"><br>
-    //   <input type="submit" value="Submit">
-    // </form>
-    // `;
+
 
     (hook = document.getElementById('change-formula')) ? hook.addEventListener('submit',function(e){getNewFormula(e);  }) : {};
 
@@ -448,25 +373,9 @@ info.update = function (properties) {
 	listCovariates();
     } : {}
 
-
-
-    // this.helpdivcontainer = L.DomUtil.create("div",'helpcontainer',this._div);
-    // helpdiv = L.DomUtil.create('div','help',this.helpdivcontainer);
-    // helpdiv.innerHTML = Object.keys(geojson.getLayers()[0].feature.properties).join('<br/>');
-    // helpdiv.innerHTML = ';lkjsf ;lksjf ;lksj df;lkjas dfl;js dfl;sjd fl f';
 };
 
-info.addTo(map);
-// info.drawSVG([2009, 2010, 2011],[20,40,15]);
 
-
-//}
-
-
-
-//timeline
-
-var timeline;
 
 var timeline = L.control({position:'bottomleft'});
 timeline.onAdd = function (map) {
@@ -484,7 +393,6 @@ timeline.onAdd = function (map) {
     return this.div;
 };
 
-timeline.addTo(map);
 
 
 
@@ -502,6 +410,7 @@ legend.onAdd = function (map) {
     var labels = [],
 	from, to;
 
+
     for (var i = 0; i < bins.length; i++) {
 	// from = bins[i];
 	// to = bins[i + 1];
@@ -515,7 +424,107 @@ legend.onAdd = function (map) {
     return this.div;
 };
 
-legend.addTo(map);
+
+var locationList = L.control({position: 'topleft'});
+locationList.update = function() {
+    new_location = locationList.location_list[locationList.idx];
+    this.select.innerHTML = this.location_list.map(
+        loc => '<option value=\"' + loc + '\"' + (new_location==loc ? ' selected' : '') + '>' + loc + '</option>').join('\n');
+}
+locationList.onAdd = function(map) {
+    this.select = L.DomUtil.create("select");
+    this.select.id = 'location-list';
+    // this.select.innerHTML = `
+
+    //     <option value="MA">MA</option>
+    //     <option value="CA">CA</option>
+    //     `;
+    // this.select.innerHTML = this.location_list.map(
+    //     loc => '<option value=\"' + loc + '\">' + loc + '</option' + (this.select.value==loc ? ' selected' : '') + '>')
+    //     .join('\n');
+    this.update();
+    this.select.onchange = function(){
+        var select = document.getElementById('location-list');
+        // newLocation = select.value;
+        locationList.idx = locationList.location_list.indexOf(locationList.select.value);
+        locationList.update();
+        init(locationList.location_list,locationList.idx);
+    };
+    return this.select;
+};
 
 
+/*------------------------------------------------------------------------------
+ initialize
+------------------------------------------------------------------------------*/
+main = function(startLatLng,bins,fills,formula,times,data) {
+    map = L.map('map').setView([ startLatLng[1], startLatLng[0]], 10);
 
+    // formula = "POPYY";
+
+    var n_colors = 10;
+    var spectrum = d3.interpolatePRGn;
+    formula = String(formula).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    formulas = []
+    for(var i=0; i<times.length; i++) {
+        formulas.push( formula.replace(/YY/g,String(times[i]).slice(2,4)));
+    }
+    if(times.length==1) data.features.forEach(f => (f.properties.fill = [f.properties.fill]));
+
+
+    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: 'Positron'
+    }).addTo(map);
+    map.attributionControl.setPrefix('');
+
+    // window.onerror = function(msg, url, linenumber) {
+    //     alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
+    //     return true;
+    // }
+    L.DomUtil.create('div', 'select-box', document.body);
+    var selectBox = document.getElementsByClassName('select-box')[0];
+
+
+    // add hooks
+    map.boxZoom._onMouseUp = boxZoomMouseUp;
+    document.getElementById('map').addEventListener("keydown",keydownListener);
+
+
+    //set up geojson
+    geojson = loadGeojson(data, current_time, spectrum);
+    geojson.updateStats(formula);
+    geojson.setFillColors(n_colors);
+    geojson.updateTime(current_time);
+    geojson.addTo(map);
+
+
+    // add leaflet controls
+    info.addTo(map);
+    timeline.addTo(map);
+    legend.addTo(map);
+    locationList.addTo(map);
+}
+
+init = function(location_list, idx) {
+    locationList.location_list = location_list;
+    locationList.idx = idx;
+    if (map) {
+        map.off();
+        map.remove();
+    }
+    if (data_js = document.getElementById('location')) {
+        document.head.removeChild(data_js);
+    }
+    var data_js = document.createElement('script');
+    data_js.onload = function() {
+        main(startLatLng,bins,fills,formula,times,data);
+    };
+    data_js.id = 'location';
+    data_js.src = location_list[idx] + '_data.js';
+    document.head.appendChild(data_js);
+}
+
+init(['CA','MA'], 0);
+
+// main()
