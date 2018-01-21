@@ -4,9 +4,7 @@ A visualization of the longitudinal census data accompanying the paper:
 
 Logan, John R., Zengwang Xu, and Brian J. Stults. 2014. "Interpolating US Decennial Census Tract Data from as Early as 1970 to 2010: A Longitudinal Tract Database" The Professional Geographer 66(3): 412–420.
 
-[Live version](https://htmlpreview.github.io/?https://github.com/haben-michael/longitudinal-census/blob/master/census.html)
-
-Update: The authors on the paper have since put out [their own visualization](https://s4.ad.brown.edu/projects/diversity/Researcher/MapLTDB.htm) of their interpolated data.
+[Live version](https://rawgit.com/haben-michael/longitudinal-census/master/census.html)
 
 ## USAGE
 A statistic using census variable names may be input in the upper right form. The left/right arrow keys advance the map through the decades. Left clicking on a tract plots the statistic over the 4 decennial census data periods included (1970-2010).
